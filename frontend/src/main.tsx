@@ -15,6 +15,7 @@ import Training from './pages/Training'
 import Datasets from './pages/Datasets'
 import Storage from './pages/Storage'
 import Settings from './pages/Settings'
+import Comparison from './pages/Comparison'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="analytics" element={<Analytics />} />
           <Route path="history" element={<History />} />
           <Route path="model" element={<ModelPage />} />
+          <Route path="comparison" element={<Comparison />} />
           <Route path="training" element={<Training />} />
           <Route path="datasets" element={<Datasets />} />
           <Route path="storage" element={<Storage />} />

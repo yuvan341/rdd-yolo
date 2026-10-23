@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import {
-  Activity, BarChart3, Brain, Camera, Database, FlaskConical, HardDrive, History, LayoutDashboard, Map, Menu, ScanSearch,
-  Settings, Video, X,
+  Activity, BarChart3, Brain, Database, FlaskConical, HardDrive, History, LayoutDashboard, Map, Menu, Scale, ScanSearch,
+  Settings, X,
 } from 'lucide-react'
 import { apiGet } from '../lib/api'
 import { STATIC } from '../lib/staticMode'
@@ -12,12 +12,11 @@ import { cx } from './ui'
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/detect', label: 'Image Detection', icon: ScanSearch },
-  { to: '/video', label: 'Video Detection', icon: Video },
-  { to: '/live', label: 'Live Camera', icon: Camera },
   { to: '/map', label: 'Damage Map', icon: Map },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/history', label: 'Detection History', icon: History },
   { to: '/model', label: 'Model', icon: Brain },
+  { to: '/comparison', label: 'Model Comparison', icon: Scale },
   { to: '/training', label: 'Training & Experiments', icon: FlaskConical },
   { to: '/datasets', label: 'Datasets', icon: Database },
   { to: '/storage', label: 'Storage', icon: HardDrive },
@@ -39,8 +38,8 @@ export default function Layout() {
   const status = down
     ? { dot: 'bg-red-500', text: 'Backend offline' }
     : !health ? { dot: 'bg-slate-400', text: 'Connecting…' }
-    : health.model_loaded ? { dot: 'bg-emerald-500', text: health.model_version }
-    : { dot: 'bg-amber-500', text: 'No model loaded' }
+      : health.model_loaded ? { dot: 'bg-emerald-500', text: health.model_version }
+        : { dot: 'bg-amber-500', text: 'No model loaded' }
 
   const sidebar = (
     <nav className="flex h-full flex-col">
@@ -53,7 +52,7 @@ export default function Layout() {
           <div className="text-[11px] text-slate-400">Road Damage Detection</div>
         </div>
       </div>
-      <div className="flex-1 space-y-0.5 px-3">
+      <div className="flex-1 space-y-0.5 px-3 overflow-y-auto">
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end={to === '/'} onClick={() => setOpen(false)}
             className={({ isActive }) => cx('flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
@@ -62,11 +61,49 @@ export default function Layout() {
           </NavLink>
         ))}
       </div>
-      <a href="https://github.com/ethical0101/RDD-YOLO" target="_blank" rel="noreferrer"
-        className="mx-3 mb-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-white/5 hover:text-white">
-        <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        Source code on GitHub
-      </a>
+
+      {/* Model Benchmark Comparison Section in Sidebar */}
+      <div className="mx-3 my-2 rounded-lg border border-slate-700/60 bg-gradient-to-br from-slate-800/90 to-slate-900/90 p-3 text-xs shadow-inner">
+        <div className="flex items-center justify-between pb-1.5 border-b border-slate-700/50">
+          <span className="font-semibold text-slate-200">Model Comparison</span>
+          <span className="text-[10px] text-orange-400 font-mono font-medium">mAP@50</span>
+        </div>
+        <div className="mt-2.5 space-y-2">
+          <div>
+            <div className="flex justify-between text-[11px] mb-0.5">
+              <span className="font-medium text-orange-400">RDD-YOLO (Ours)</span>
+              <span className="font-mono text-white font-bold">64.2%</span>
+            </div>
+            <div className="h-1.5 w-full bg-slate-700/60 rounded-full overflow-hidden">
+              <div className="h-full bg-orange-500 rounded-full" style={{ width: '64.2%' }} />
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between text-[11px] mb-0.5">
+              <span className="text-slate-300">YOLOv8</span>
+              <span className="font-mono text-slate-300">59.7%</span>
+            </div>
+            <div className="h-1.5 w-full bg-slate-700/60 rounded-full overflow-hidden">
+              <div className="h-full bg-sky-500 rounded-full" style={{ width: '59.7%' }} />
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between text-[11px] mb-0.5">
+              <span className="text-slate-400">Faster R-CNN</span>
+              <span className="font-mono text-slate-400">52.4%</span>
+            </div>
+            <div className="h-1.5 w-full bg-slate-700/60 rounded-full overflow-hidden">
+              <div className="h-full bg-slate-500 rounded-full" style={{ width: '52.4%' }} />
+            </div>
+          </div>
+        </div>
+        <NavLink to="/comparison" onClick={() => setOpen(false)}
+          className="mt-2.5 flex items-center justify-between text-[11px] font-medium text-orange-400 hover:text-orange-300 transition-colors pt-1.5 border-t border-slate-700/30">
+          <span>Detailed comparison</span>
+          <span>→</span>
+        </NavLink>
+      </div>
+
       <div className="m-3 rounded-lg bg-white/5 p-3 text-xs text-slate-300">
         <div className="flex items-center gap-2">
           <span className={cx('h-2 w-2 rounded-full', status.dot)} />
